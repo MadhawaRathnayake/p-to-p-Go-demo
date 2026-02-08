@@ -21,8 +21,9 @@ type Message struct {
 var (
 	nodeID string
 	addr   string
-	peers  = make(map[string]string)
-	mutex  sync.Mutex
+
+	peers = make(map[string]string)
+	mutex sync.Mutex
 )
 
 func handleConnection(conn net.Conn) {
@@ -42,8 +43,9 @@ func handleConnection(conn net.Conn) {
 		peers[msg.NodeID] = msg.Addr
 		mutex.Unlock()
 
-		fmt.Printf("Connected peer: %s (%s)\n", msg.NodeID, msg.Addr)
+		fmt.Printf("\n[NETWORK] Connected peer: %s (%s)\n", msg.NodeID, msg.Addr)
 		printPeers()
+		fmt.Print("> ")
 	}
 }
 
@@ -78,11 +80,58 @@ func connectToPeer(peerAddr string) {
 }
 
 func printPeers() {
-	fmt.Println("Current peers:")
+	mutex.Lock()
+	defer mutex.Unlock()
+
+	if len(peers) == 0 {
+		fmt.Println("No connected peers.")
+		return
+	}
+
+	fmt.Println("Connected peers:")
 	for id, a := range peers {
 		fmt.Printf("- %s @ %s\n", id, a)
 	}
-	fmt.Println("----")
+}
+
+func startCLI() {
+	reader := bufio.NewReader(os.Stdin)
+
+	fmt.Println("Interactive CLI started. Type `help`.")
+	fmt.Print("> ")
+
+	for {
+		input, _ := reader.ReadString('\n')
+		cmd := strings.TrimSpace(input)
+
+		switch cmd {
+
+		case "help":
+			fmt.Println("Available commands:")
+			fmt.Println("  peers  - list connected peers")
+			fmt.Println("  id     - show node id")
+			fmt.Println("  help   - show this help")
+			fmt.Println("  exit   - stop node")
+
+		case "peers":
+			printPeers()
+
+		case "id":
+			fmt.Println("Node ID:", nodeID)
+
+		case "exit":
+			fmt.Println("Shutting down node.")
+			os.Exit(0)
+
+		case "":
+			// ignore empty input
+
+		default:
+			fmt.Println("Unknown command:", cmd)
+		}
+
+		fmt.Print("> ")
+	}
 }
 
 func main() {
@@ -105,5 +154,5 @@ func main() {
 		}
 	}
 
-	select {} // keep running
+	startCLI()
 }

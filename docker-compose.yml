@@ -4,30 +4,40 @@ services:
   node1:
     build: .
     command: ["--id=node1", "--addr=node1:8000"]
+    stdin_open: true
+    tty: true
     networks:
       - p2pnet
 
   node2:
     build: .
     command: ["--id=node2", "--addr=node2:8000", "--peers=node1:8000"]
+    stdin_open: true
+    tty: true
     networks:
       - p2pnet
 
   node3:
     build: .
     command: ["--id=node3", "--addr=node3:8000", "--peers=node1:8000"]
+    stdin_open: true
+    tty: true
     networks:
       - p2pnet
 
   node4:
     build: .
     command: ["--id=node4", "--addr=node4:8000", "--peers=node2:8000"]
+    stdin_open: true
+    tty: true
     networks:
       - p2pnet
 
   node5:
     build: .
     command: ["--id=node5", "--addr=node5:8000", "--peers=node3:8000"]
+    stdin_open: true
+    tty: true
     networks:
       - p2pnet
 
